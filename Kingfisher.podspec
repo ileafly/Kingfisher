@@ -61,6 +61,7 @@ Pod::Spec.new do |s|
       "Sources/Extensions/WKInterfaceImage+Kingfisher.swift"
     ]
   s.requires_arc = true
+  s.static_framework = true
   s.frameworks = "CFNetwork", "Accelerate"
 
 end
