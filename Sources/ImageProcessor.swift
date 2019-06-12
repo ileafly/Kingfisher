@@ -678,6 +678,52 @@ public struct CroppingImageProcessor: ImageProcessor {
     }
 }
 
+/// Processor for downsampling an image. Compared to `ResizingImageProcessor`, this processor
+/// does not render the images to resize. Instead, it downsample the input data directly to an
+/// image. It is a more efficient than `ResizingImageProcessor`.
+///
+/// Only CG-based images are supported. Animated images (like GIF) is not supported.
+public struct DownsamplingImageProcessor: ImageProcessor {
+    
+    /// Target size of output image should be. It should be smaller than the size of
+    /// input image. If it is larger, the result image will be the same size of input
+    /// data without downsampling.
+    public let size: CGSize
+    
+    /// Identifier of the processor.
+    /// - Note: See documentation of `ImageProcessor` protocol for more.
+    public var identifier: String
+    
+    /// Creates a `DownsamplingImageProcessor`.
+    ///
+    /// - Parameter size: The target size of the downsample operation.
+    public init(size: CGSize) {
+        self.size = size
+        self.identifier = "com.onevcat.Kingfisher.DownsamplingImageProcessor(\(size))"
+    }
+    
+    /// Processes the input `ImageProcessItem` with this processor.
+    ///
+    /// - Parameters:
+    ///   - item: Input item which will be processed by `self`.
+    ///   - options: Options when processing the item.
+    /// - Returns: The processed image.
+    ///
+    /// - Note: See documentation of `ImageProcessor` protocol for more.
+    public func process(item: ImageProcessItem, options: KingfisherOptionsInfo) -> Image? {
+        switch item {
+        case .image(let image):
+            guard let data = image.kf.data(format: .unknown) else {
+                return nil
+            }
+            return Kingfisher<Image>.downsampledImage(data: data, to: size, scale: options.scaleFactor)
+        case .data(_): return (DefaultImageProcessor.default >> self).process(item: item, options: options)
+        }
+    }
+    
+    
+}
+
 /// Concatenate two `ImageProcessor`s. `ImageProcessor.appen(another:)` is used internally.
 ///
 /// - parameter left:  First processor.

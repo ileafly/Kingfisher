@@ -67,10 +67,14 @@ extension ViewController {
     override func collectionView(_ collectionView: UICollectionView, willDisplay cell: UICollectionViewCell, forItemAt indexPath: IndexPath) {
         
         let url = URL(string: "https://raw.githubusercontent.com/onevcat/Kingfisher/master/images/kingfisher-\(indexPath.row + 1).jpg")!
+        
+//        let processor = ResizingImageProcessor(referenceSize: (cell as! CollectionViewCell).cellImageView.frame.size)
+        let processor = DownsamplingImageProcessor(size: (cell as! CollectionViewCell).cellImageView.frame.size)
+        
 
         _ = (cell as! CollectionViewCell).cellImageView.kf.setImage(with: url,
                                            placeholder: nil,
-                                           options: [.transition(ImageTransition.fade(1))],
+                                           options: [.processor(processor)],
                                            progressBlock: { receivedSize, totalSize in
                                             print("\(indexPath.row + 1): \(receivedSize)/\(totalSize)")
             },

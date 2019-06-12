@@ -210,6 +210,24 @@ extension Kingfisher where Base: Image {
     public func gifRepresentation() -> Data? {
         return animatedImageData
     }
+    
+    // MARK: - Image Data
+    /// Returns a data representation for `base` image, with the `format` as the format indicator.
+    ///
+    /// - Parameter format: The format in which the output data should be. If `unknown`, the `base` image will be
+    ///                     converted in the PNG representation.
+    /// - Returns: The output data representing.
+    public func data(format: ImageFormat) -> Data? {
+        let data: Data?
+        switch format {
+        case .PNG: data = pngRepresentation()
+        case .JPEG: data = jpegRepresentation(compressionQuality: 1.0)
+        case .GIF: data = gifRepresentation()
+        case .unknown: data = normalized.kf.pngRepresentation()
+        }
+        
+        return data
+    }
 }
 
 // MARK: - Create images from data
@@ -339,6 +357,24 @@ extension Kingfisher where Base: Image {
         #endif
 
         return image
+    }
+    
+    public static func downsampledImage(data: Data, to pointSize: CGSize, scale: CGFloat) -> Image? {
+        let imageSourceOptions = [kCGImageSourceShouldCache: false] as CFDictionary
+        guard let imageSource = CGImageSourceCreateWithData(data as CFData, imageSourceOptions) else {
+            return nil
+        }
+        
+        let maxDimensionInPixels = max(pointSize.width, pointSize.height) * scale
+        let downsampleOptions = [
+            kCGImageSourceCreateThumbnailFromImageAlways: true,
+            kCGImageSourceShouldCacheImmediately: true,
+            kCGImageSourceCreateThumbnailWithTransform: true,
+            kCGImageSourceThumbnailMaxPixelSize: maxDimensionInPixels] as CFDictionary
+        guard let downsampledImage = CGImageSourceCreateThumbnailAtIndex(imageSource, 0, downsampleOptions) else {
+            return nil
+        }
+        return Kingfisher<Image>.image(cgImage: downsampledImage, scale: scale, refImage: nil)
     }
 }
 
