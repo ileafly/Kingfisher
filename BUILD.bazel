@@ -1,0 +1,14 @@
+load("@build_bazel_rules_swift//swift:swift.bzl", "swift_library")
+package(default_visibility = ["//visibility:public"])
+
+swift_library(
+    name = "Kingfisher",
+    srcs = glob(
+        ["Sources/**/*.swift"],
+        exclude = [
+            "Sources/Extensions/NSButton+Kingfisher.swift",
+            "Sources/Extensions/WKInterfaceImage+Kingfisher.swift"
+        ]
+    ),
+    copts = ["-no-warnings-as-errors"],
+)
